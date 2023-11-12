@@ -25,7 +25,7 @@ final class ImportData extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $filePath = $this->argument('file');
         if(file_exists($filePath)){
