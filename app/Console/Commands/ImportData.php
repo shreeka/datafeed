@@ -36,6 +36,10 @@ final class ImportData extends Command
                     $this->handleXMLFile($filePath);
                     break;
                 default:
+                    $this->error('File not supported.');
+                    Log::channel('datafeedlog')->error('File not supported.');
+                    break;
+
 
             }
         }else{
@@ -69,8 +73,8 @@ final class ImportData extends Command
                     'facebook' => (int)$item->Facebook,
                     'is_KCup' => (int)$item->IsKCup,
             ];
-            $this->insertIntoItemsTable($itemData);
         }
+        $this->insertIntoItemsTable($itemData);
         $this->info('Data from XML file imported to DB successfully.');
     }
 
@@ -82,34 +86,37 @@ final class ImportData extends Command
     /**
      * @return void
      */
-    public function insertIntoItemsTable(Array $item): void
+    public function insertIntoItemsTable(Array $items): void
     {
-        try {
-            DB::table('items')->insert([
-                'entity_id' => $item->entity_id,
-                'category_name' => $item->CategoryName,
-                'sku' => $item->sku,
-                'name' => $item->name,
-                'description' => $item->description,
-                'short_desc' => $item->shortdesc,
-                'price' => $this->cleanPriceVal($item->price),
-                'link' => $item->link,
-                'image' => $item->image,
-                'brand' => $item->Brand,
-                'rating' => $item->Rating,
-                'caffeine_type' => $item->CaffeineType,
-                'count' => $item->Count,
-                'flavored' => $item->Flavored,
-                'seasonal' => $item->Seasonal,
-                'in_stock' => $item->Instock,
-                'facebook' => $item->Facebook,
-                'is_KCup' => $item->IsKCup,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } catch (\Exception $e) {
-            Log::channel('datafeedlog')->error('Error inserting into items table:', $e->getMessage());
-    }
+        foreach($items as $item) {
+            try {
+                DB::table('items')->insert([
+                    'entity_id' => $item['entity_id'],
+                    'category_name' => $item['category_name'],
+                    'sku' => $item['sku'],
+                    'name' => $item['name'],
+                    'description' => $item['description'],
+                    'short_desc' => $item['short_desc'],
+                    'price' => $this->cleanPriceVal($item['price']),
+                    'link' => $item['link'],
+                    'image' => $item['image'],
+                    'brand' => $item['brand'],
+                    'rating' => $item['rating'],
+                    'caffeine_type' => $item['caffeine_type'],
+                    'count' => $item['count'],
+                    'flavored' => $item['flavored'],
+                    'seasonal' => $item['seasonal'],
+                    'in_stock' => $item['in_stock'],
+                    'facebook' => $item['facebook'],
+                    'is_KCup' => $item['is_KCup'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } catch (\Exception $e) {
+                Log::channel('datafeedlog')->error('Error inserting into items table:', [$e->getMessage()]);
+            }
+        }
+
 
     }
 }
